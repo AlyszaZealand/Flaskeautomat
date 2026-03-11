@@ -18,7 +18,7 @@ import java.util.Random;
         @Override
         public void run() {
             try {
-                // En uendelig løkke, så producenten bliver ved med at arbejde
+                //  En uendelig løkke, så producenten bliver ved med at arbejde
                 while (true) {
                     // 1. Beslut om det er en øl eller en vand (50/50 chance)
                     String type = random.nextBoolean() ? "øl" : "sodavand";
