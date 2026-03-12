@@ -1,33 +1,28 @@
 public class Splitter implements Runnable {
 
-    // Splitteren har brug for adgang til tre transportbånd:
-        private Buffer indkommendeBånd; // Båndet fra Producenten
-        private Buffer ølBånd;          // Båndet kun til øl
-        private Buffer sodavandsBånd;   // Båndet kun til sodavand
+        private Buffer incommingBelt; // Båndet fra Producenten
+        private Buffer beerBelt;          // Båndet kun til øl
+        private Buffer sodaBelt;   // Båndet kun til sodavand
 
-        // Konstruktøren: Vi giver Splitteren de tre bånd, når vi opretter den
-        public Splitter(Buffer indkommendeBånd, Buffer ølBånd, Buffer sodavandsBånd) {
-            this.indkommendeBånd = indkommendeBånd;
-            this.ølBånd = ølBånd;
-            this.sodavandsBånd = sodavandsBånd;
+
+        public Splitter(Buffer incommingBelt, Buffer beerBelt, Buffer sodaBelt) {
+            this.incommingBelt = incommingBelt;
+            this.beerBelt = beerBelt;
+            this.sodaBelt = sodaBelt;
         }
 
         @Override
         public void run() {
             try {
-                // En uendelig løkke, så Splitteren altid står klar til at sortere
                 while (true) {
-                    // 1. Hent den næste flaske fra det fælles bånd
-                    // Hvis båndet er tomt, falder Splitteren i søvn her (notEmpty.await())
-                    String flaske = indkommendeBånd.take();
+                    String bottle = incommingBelt.take();
 
-                    // 2. Tjek hvilken type flaske det er, og send den til det rigtige bånd
-                    if (flaske.startsWith("øl")) {
-                        ølBånd.put(flaske); // Læg på øl-båndet
-                        System.out.println("\u001B[33m" + "  Splitter sorterede en øl: " + flaske + "\u001B[0m");
-                    } else if (flaske.startsWith("soda")) {
-                        sodavandsBånd.put(flaske); // Læg på sodavands-båndet
-                        System.out.println("\u001B[33m" + "  Splitter sorterede en vand: " + flaske + "\u001B[0m");
+                    if (bottle.startsWith("øl")) {
+                        beerBelt.put(bottle); // Læg på øl-båndet
+                        System.out.println("\u001B[33m" + "  Splitter sorterede en øl: " + bottle + "\u001B[0m");
+                    } else if (bottle.startsWith("soda")) {
+                        sodaBelt.put(bottle); // Læg på sodavands-båndet
+                        System.out.println("\u001B[33m" + "  Splitter sorterede en vand: " + bottle + "\u001B[0m");
                     }
                 }
             } catch (InterruptedException e) {

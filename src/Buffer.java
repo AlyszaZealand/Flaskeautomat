@@ -9,19 +9,19 @@ public class Buffer {
     private int maxSize;
 
     // NYT: Hvor mange flasker skal vi vente på, før vi åbner for sluserne?
-    private int startGrænse;
+    private int startingToSortSize;
 
     // NYT: Vores "afbryder", der fortæller om vi er i gang med at tømme
-    private boolean klarTilAtTømme = false;
+    private boolean readyToSplit = false;
 
     private Lock lock;
     private Condition notFull;
     private Condition notEmpty;
 
     // NYT: Konstruktøren tager nu to tal: Max plads, og hvornår vi starter
-    public Buffer(int maxSize, int startGrænse) {
+    public Buffer(int maxSize, int startingToSortSize) {
         this.maxSize = maxSize;
-        this.startGrænse = startGrænse;
+        this.startingToSortSize = startingToSortSize;
         this.queue = new LinkedList<>();
 
         this.lock = new ReentrantLock();
@@ -29,18 +29,18 @@ public class Buffer {
         this.notEmpty = lock.newCondition();
     }
 
-    public void put(String flaske) throws InterruptedException {
+    public void put(String Bottle) throws InterruptedException {
         lock.lock();
         try {
             while (queue.size() == maxSize) {
                 notFull.await();
             }
 
-            queue.add(flaske);
+            queue.add(Bottle);
 
             // NYT: Tjek om vi har ramt vores magiske grænse (f.eks. 50)
-            if (queue.size() >= startGrænse) {
-                klarTilAtTømme = true; // Slå afbryderen TIL!
+            if (queue.size() >= startingToSortSize) {
+                readyToSplit = true; // Slå afbryderen TIL!
                 notEmpty.signal();    // Væk Splitteren, nu er der fest!
             }
         } finally {
@@ -52,19 +52,19 @@ public class Buffer {
         lock.lock();
         try {
             // NYT: Splitteren venter, indtil afbryderen er slået TIL
-            while (!klarTilAtTømme) {
+            while (!readyToSplit) {
                 notEmpty.await();
             }
 
-            String flaske = queue.poll();
+            String Bottle = queue.poll();
             notFull.signal();
 
             // NYT: Hvis Splitteren lige har taget den ALLERSIDSTE flaske...
             if (queue.isEmpty()) {
-                klarTilAtTømme = false; // Slå afbryderen FRA igen, så vi skal vente på 50 næste gang
+                readyToSplit = false; // Slå afbryderen FRA igen, så vi skal vente på 50 næste gang
             }
 
-            return flaske;
+            return Bottle;
         } finally {
             lock.unlock();
         }
